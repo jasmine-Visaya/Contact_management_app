@@ -82,61 +82,63 @@
           <ion-icon :icon="addOutline" class="add-icon"></ion-icon>
         </ion-fab-button>
       </ion-fab>
+    </ion-content>
 
-      <!-- Add / Edit Contact Modal -->
-      <ion-modal :is-open="isModalOpen" @didDismiss="closeModal" class="modern-modal">
-        <ion-header>
-          <ion-toolbar color="primary" class="modal-toolbar">
-            <ion-title class="modal-title">
+    <!-- ========== CUSTOM MODAL (no ion-modal) ========== -->
+    <transition name="modal-fade">
+      <div v-if="isModalOpen" class="modal-overlay" @click.self="closeModal">
+        <div class="modal-card">
+          <!-- Header -->
+          <div class="modal-header">
+            <h2 class="modal-title">
               <span class="modal-title-emoji">{{ isEditing ? '✏️' : '✨' }}</span>
               {{ isEditing ? 'Edit Contact' : 'Add New Contact' }}
-            </ion-title>
-            <ion-buttons slot="end">
-              <ion-button @click="closeModal" class="cancel-button">Cancel</ion-button>
-            </ion-buttons>
-          </ion-toolbar>
-        </ion-header>
-
-        <ion-content class="ion-padding modal-content">
-          <div class="form-container">
-            <ion-item class="form-item">
-              <ion-label position="stacked" class="form-label">Name *</ion-label>
-              <ion-input v-model="form.name" placeholder="John Doe" class="form-input"></ion-input>
-            </ion-item>
-
-            <ion-item class="form-item">
-              <ion-label position="stacked" class="form-label">Phone Number *</ion-label>
-              <ion-input v-model="form.phone" type="tel" placeholder="09123456789" class="form-input"></ion-input>
-            </ion-item>
-
-            <ion-item class="form-item">
-              <ion-label position="stacked" class="form-label">Email Address</ion-label>
-              <ion-input v-model="form.email" type="email" placeholder="john@example.com" class="form-input"></ion-input>
-            </ion-item>
-
-            <ion-item class="form-item">
-              <ion-label position="stacked" class="form-label">Address</ion-label>
-              <ion-input v-model="form.address" placeholder="123 Street, City" class="form-input"></ion-input>
-            </ion-item>
-
-            <ion-item class="form-item">
-              <ion-label position="stacked" class="form-label">Category / Relationship *</ion-label>
-              <ion-select v-model="form.category" placeholder="Select category" class="form-select">
-                <ion-select-option value="Family">👨‍👩‍👧‍👦 Family</ion-select-option>
-                <ion-select-option value="Friend">🤝 Friend</ion-select-option>
-                <ion-select-option value="Work">💼 Work</ion-select-option>
-                <ion-select-option value="Other">🌟 Other</ion-select-option>
-              </ion-select>
-            </ion-item>
-
-            <ion-button expand="block" color="primary" class="ion-margin-top save-button" @click="saveContact">
-              <ion-icon :icon="isEditing ? 'checkmark-circle-outline' : 'add-circle-outline'" slot="start"></ion-icon>
-              {{ isEditing ? 'Update Contact' : 'Save Contact' }}
-            </ion-button>
+            </h2>
+            <button class="cancel-button" @click="closeModal">Cancel</button>
           </div>
-        </ion-content>
-      </ion-modal>
-    </ion-content>
+
+          <!-- Body (scrollable) -->
+          <div class="modal-body">
+            <div class="form-container">
+              <div class="form-item">
+                <label class="form-label">Name *</label>
+                <input v-model="form.name" type="text" placeholder="John Doe" class="form-input" />
+              </div>
+
+              <div class="form-item">
+                <label class="form-label">Phone Number *</label>
+                <input v-model="form.phone" type="tel" placeholder="09123456789" class="form-input" />
+              </div>
+
+              <div class="form-item">
+                <label class="form-label">Email Address</label>
+                <input v-model="form.email" type="email" placeholder="john@example.com" class="form-input" />
+              </div>
+
+              <div class="form-item">
+                <label class="form-label">Address</label>
+                <input v-model="form.address" type="text" placeholder="123 Street, City" class="form-input" />
+              </div>
+
+              <div class="form-item">
+                <label class="form-label">Category / Relationship *</label>
+                <select v-model="form.category" class="form-select">
+                  <option value="Family">👨‍👩‍👧‍👦 Family</option>
+                  <option value="Friend">🤝 Friend</option>
+                  <option value="Work">💼 Work</option>
+                  <option value="Other">🌟 Other</option>
+                </select>
+              </div>
+
+              <button class="save-button" @click="saveContact">
+                <ion-icon :icon="isEditing ? 'checkmark-circle-outline' : 'add-circle-outline'"></ion-icon>
+                {{ isEditing ? 'Update Contact' : 'Save Contact' }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </transition>
   </ion-page>
 </template>
 
@@ -145,7 +147,7 @@ import { ref as vueRef, computed, onMounted, watch } from 'vue';
 import {
   IonPage, IonHeader, IonToolbar, IonTitle, IonContent,
   IonList, IonItem, IonLabel, IonBadge, IonButton, IonIcon,
-  IonFab, IonFabButton, IonModal, IonButtons, IonInput, IonSelect, IonSelectOption, IonSearchbar,
+  IonFab, IonFabButton, IonSearchbar,
   IonItemSliding, IonItemOptions, IonItemOption
 } from '@ionic/vue';
 import { addOutline, trashOutline, createOutline, moonOutline, sunnyOutline } from 'ionicons/icons';
@@ -270,6 +272,11 @@ const closeModal = () => {
   isModalOpen.value = false;
 };
 
+// Lock body scroll while the custom modal is open
+watch(isModalOpen, (open) => {
+  document.documentElement.classList.toggle('modal-open', open);
+});
+
 // CREATE & UPDATE logic
 const saveContact = async () => {
   if (!form.value.name || !form.value.phone) {
@@ -363,6 +370,12 @@ const deleteContact = async (id) => {
   --edit-bg-hover: rgba(139, 154, 245, 0.15);
   --delete-color: #fc8181;
   --delete-bg-hover: rgba(252, 129, 129, 0.15);
+}
+
+/* Lock body scroll when the custom modal is open */
+:global(html.modal-open),
+:global(html.modal-open body) {
+  overflow: hidden !important;
 }
 
 .modern-toolbar {
@@ -665,126 +678,100 @@ const deleteContact = async (id) => {
   color: #ffffff !important;
 }
 
-/* ========== MODAL ========== */
+/* ===================================================== */
+/* ========== CUSTOM MODAL (replaces ion-modal) ======== */
+/* ===================================================== */
 
-/* Mobile: full screen (original Ionic behavior) */
-.modern-modal {
-  --width: 100%;
-  --max-width: 100%;
-  --height: 100%;
-  --border-radius: 0;
-  --backdrop-opacity: 0;
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0);
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
 }
 
-/* Desktop/tablet: centered rounded card with definite height */
 @media (min-width: 768px) {
-  .modern-modal {
-    --width: 90%;
-    --max-width: 520px;
-    --height: 620px;
-    --max-height: 90vh;
-    --border-radius: 24px;
-    --backdrop-opacity: 0.5;
+  .modal-overlay {
+    background: rgba(0, 0, 0, 0.45);
+    align-items: center;
+    padding: 24px;
   }
 }
 
-/* Modal content part — mobile */
-ion-modal.modern-modal::part(content) {
+:global(html.dark-theme) .modal-overlay {
+  background: rgba(0, 0, 0, 0);
+}
+
+@media (min-width: 768px) {
+  :global(html.dark-theme) .modal-overlay {
+    background: rgba(0, 0, 0, 0.75);
+  }
+}
+
+.modal-card {
+  width: 100%;
+  height: 100%;
+  max-height: 100%;
   background: #f9fafc;
-  border-radius: 0;
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
+  border-radius: 0;
   box-shadow: none;
-  width: 100%;
-  height: 100%;
 }
 
-/* Modal content part — desktop */
-@media (min-width: 768px) {
-  ion-modal.modern-modal::part(content) {
-    background: #f9fafc;
-    border-radius: 24px;
-    overflow: hidden;
-    box-shadow: 0 20px 60px rgba(102, 126, 234, 0.25);
-    width: 100%;
-    height: 60%;
-    max-height: 90vh;
-    display: flex;
-    flex-direction: column;
-  }
-}
-
-/* Dark mode — mobile */
-:global(html.dark-theme) ion-modal.modern-modal::part(content) {
+:global(html.dark-theme) .modal-card {
   background: #161a24;
-  border-radius: 0;
-  overflow: hidden;
-  box-shadow: none;
-  width: 100%;
-  height: 100%;
 }
 
-/* Dark mode — desktop */
 @media (min-width: 768px) {
-  :global(html.dark-theme) ion-modal.modern-modal::part(content) {
-    background: #161a24;
-    border-radius: 24px;
-    overflow: hidden;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+  .modal-card {
     width: 100%;
-    height: 100%;
+    max-width: 520px;
+    height: auto;
     max-height: 90vh;
-    display: flex;
-    flex-direction: column;
+    border-radius: 24px;
+    box-shadow: 0 20px 60px rgba(102, 126, 234, 0.25);
+  }
+
+  :global(html.dark-theme) .modal-card {
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
   }
 }
 
-ion-modal.modern-modal::part(backdrop) {
-  background: #000000;
-  opacity: 0;
-}
-
-@media (min-width: 768px) {
-  ion-modal.modern-modal::part(backdrop) {
-    background: #000000;
-    opacity: 0.4;
-  }
-}
-
-:global(html.dark-theme) ion-modal.modern-modal::part(backdrop) {
-  background: #000000;
-  opacity: 0;
-}
-
-@media (min-width: 768px) {
-  :global(html.dark-theme) ion-modal.modern-modal::part(backdrop) {
-    background: #000000;
-    opacity: 0.75;
-  }
-}
-
-.modal-toolbar {
-  --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  --color: #ffffff;
-  --border-radius: 0;
+/* ---------- Modal Header ---------- */
+.modal-header {
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #ffffff;
+  border-radius: 0;
+}
+
+:global(html.dark-theme) .modal-header {
+  background: linear-gradient(135deg, #4a56b8 0%, #6a4090 100%);
 }
 
 @media (min-width: 768px) {
-  .modal-toolbar {
-    --border-radius: 24px 24px 0 0;
+  .modal-header {
+    border-radius: 24px 24px 0 0;
   }
-}
-
-:global(html.dark-theme) .modal-toolbar {
-  --background: linear-gradient(135deg, #4a56b8 0%, #6a4090 100%);
 }
 
 .modal-title {
   font-weight: 700;
   font-size: 1.15rem;
+  margin: 0;
   display: flex;
   align-items: center;
   gap: 8px;
+  color: #ffffff;
 }
 
 .modal-title-emoji {
@@ -792,50 +779,54 @@ ion-modal.modern-modal::part(backdrop) {
 }
 
 .cancel-button {
-  --color: #ffffff;
-  --background-hover: rgba(255, 255, 255, 0.15);
+  background: transparent;
+  border: none;
+  color: #ffffff;
   font-weight: 600;
-  text-transform: none;
   font-size: 0.95rem;
+  cursor: pointer;
+  padding: 8px 12px;
+  border-radius: 8px;
+  transition: background-color 0.2s ease;
+  font-family: inherit;
 }
 
-.modal-content {
-  --background: var(--form-bg);
-  --padding-top: 16px;
-  --padding-bottom: 16px;
-  --padding-start: 16px;
-  --padding-end: 16px;
-  transition: --background 0.4s ease;
+.cancel-button:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* ---------- Modal Body ---------- */
+.modal-body {
   flex: 1 1 auto;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 16px;
+  background: var(--form-bg);
 }
 
-:global(html.dark-theme) .modal-content {
-  --background: #161a24;
+:global(html.dark-theme) .modal-body {
+  background: #161a24;
 }
 
+/* ---------- Form ---------- */
 .form-container {
   max-width: 500px;
   margin: 0 auto;
-  padding-bottom: 16px;
-  height: auto;
-  animation: slideUp 0.4s ease;
-}
-
-@keyframes slideUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+  padding-bottom: 8px;
+  display: flex;
+  flex-direction: column;
 }
 
 .form-item {
-  --background: var(--form-item-bg);
-  --border-radius: 14px;
-  --padding-start: 16px;
-  --padding-end: 16px;
-  --min-height: 64px;
-  margin-bottom: 14px;
+  background: var(--form-item-bg);
   border-radius: 14px;
+  padding: 12px 16px;
+  margin-bottom: 14px;
   box-shadow: var(--form-shadow);
-  transition: box-shadow 0.3s ease, transform 0.2s ease, --background 0.4s ease;
+  transition: box-shadow 0.3s ease, transform 0.2s ease, background-color 0.4s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
 .form-item:focus-within {
@@ -845,127 +836,128 @@ ion-modal.modern-modal::part(backdrop) {
 
 .form-label {
   font-weight: 600;
-  font-size: 0.82rem;
+  font-size: 0.78rem;
   color: var(--accent);
   letter-spacing: 0.3px;
   text-transform: uppercase;
-  margin-bottom: 4px;
   transition: color 0.4s ease;
 }
 
-.form-input {
-  --padding-top: 8px;
-  --padding-bottom: 8px;
-  --color: var(--text-primary);
-  --placeholder-color: var(--text-tertiary);
-  --placeholder-opacity: 0.7;
+.form-input,
+.form-select {
+  width: 100%;
+  border: none;
+  outline: none;
+  background: transparent;
   font-size: 0.95rem;
+  color: var(--text-primary);
+  font-family: inherit;
+  padding: 4px 0;
+  transition: color 0.4s ease;
 }
 
-:global(html.dark-theme) .form-input {
-  --color: #e8ecf3;
-  --placeholder-color: #6b7689;
-  --placeholder-opacity: 1;
+.form-input::placeholder {
+  color: var(--text-tertiary);
+  opacity: 0.7;
 }
 
-:global(html.dark-theme) .form-input::part(native) {
-  color: #e8ecf3 !important;
-}
-
-:global(html.dark-theme) .form-input::part(native)::placeholder {
-  color: #6b7689 !important;
+:global(html.dark-theme) .form-input::placeholder {
+  color: #6b7689;
   opacity: 1;
+}
+
+:global(html.dark-theme) .form-input,
+:global(html.dark-theme) .form-select {
+  color: #e8ecf3;
 }
 
 .form-select {
-  --padding-top: 8px;
-  --padding-bottom: 8px;
-  --color: var(--text-primary);
-  --placeholder-color: var(--text-tertiary);
-  color: var(--text-primary) !important;
-  font-size: 0.95rem;
-}
-
-.form-select::part(text) {
-  color: var(--text-primary) !important;
-}
-
-.form-select::part(placeholder) {
-  color: var(--text-tertiary) !important;
-  opacity: 0.8;
-}
-
-.form-select::part(icon) {
-  color: var(--text-secondary) !important;
-  opacity: 1;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23718096' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 0 center;
+  background-size: 18px;
+  padding-right: 24px;
 }
 
 :global(html.dark-theme) .form-select {
-  --color: #e8ecf3;
-  color: #e8ecf3 !important;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a9b4c7' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
 }
 
-:global(html.dark-theme) .form-select::part(text) {
-  color: #e8ecf3 !important;
+.form-select option {
+  background: var(--form-item-bg);
+  color: var(--text-primary);
 }
 
-:global(html.dark-theme) .form-select::part(placeholder) {
-  color: #6b7689 !important;
+:global(html.dark-theme) .form-select option {
+  background: #1c212e;
+  color: #e8ecf3;
 }
 
-:global(html.dark-theme) .form-select::part(icon) {
-  color: #a9b4c7 !important;
-}
-
-:global(html.dark-theme) ion-select-popup,
-:global(html.dark-theme) ion-popover {
-  --background: #1c212e;
-  --color: #e8ecf3;
-}
-
-:global(html.dark-theme) ion-select-popup ion-item,
-:global(html.dark-theme) ion-popover ion-item {
-  --background: #1c212e;
-  --color: #e8ecf3;
-}
-
-:global(html.dark-theme) ion-select-popup ion-radio,
-:global(html.dark-theme) ion-popover ion-radio {
-  --color: #a9b4c7;
-  --color-checked: #8b9af5;
-}
-
-:global(html.dark-theme) ion-select-popup ion-radio-group ion-item ion-label,
-:global(html.dark-theme) ion-popover ion-radio-group ion-item ion-label {
-  color: #e8ecf3 !important;
-}
-
+/* ---------- Save Button ---------- */
 .save-button {
-  --background: var(--accent-gradient);
-  --border-radius: 14px;
-  --box-shadow: 0 4px 16px rgba(102, 126, 234, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  background: var(--accent-gradient);
+  color: #ffffff;
+  border: none;
+  border-radius: 14px;
   font-weight: 700;
   font-size: 1rem;
   height: 52px;
   letter-spacing: 0.4px;
-  text-transform: none;
-  transition: transform 0.2s ease, box-shadow 0.3s ease, --background 0.4s ease;
+  cursor: pointer;
+  font-family: inherit;
   margin-top: 8px;
-}
-
-:global(html.dark-theme) .save-button {
-  --box-shadow: 0 4px 20px rgba(139, 154, 245, 0.35);
+  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.4);
+  transition: transform 0.2s ease, box-shadow 0.3s ease;
 }
 
 .save-button:hover {
   transform: translateY(-2px);
-  --box-shadow: 0 8px 24px rgba(102, 126, 234, 0.55);
+  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.55);
 }
 
 .save-button:active {
   transform: translateY(0);
 }
 
+:global(html.dark-theme) .save-button {
+  box-shadow: 0 4px 20px rgba(139, 154, 245, 0.35);
+}
+
+.save-button ion-icon {
+  font-size: 1.2rem;
+}
+
+/* ---------- Transition ---------- */
+.modal-fade-enter-active,
+.modal-fade-leave-active {
+  transition: opacity 0.25s ease;
+}
+
+.modal-fade-enter-active .modal-card,
+.modal-fade-leave-active .modal-card {
+  transition: transform 0.25s ease, opacity 0.25s ease;
+}
+
+.modal-fade-enter-from,
+.modal-fade-leave-to {
+  opacity: 0;
+}
+
+.modal-fade-enter-from .modal-card,
+.modal-fade-leave-to .modal-card {
+  transform: translateY(20px) scale(0.98);
+  opacity: 0;
+}
+
+/* ---------- Shared animations ---------- */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
