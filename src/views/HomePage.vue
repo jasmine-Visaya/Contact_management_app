@@ -170,9 +170,7 @@ const form = vueRef({
 const isDarkMode = vueRef(false);
 
 const applyTheme = (dark) => {
-  // Apply to the html element so it cascades everywhere (including modals)
   document.documentElement.classList.toggle('dark-theme', dark);
-  // Also toggle Ionic's built-in dark palette class for native components
   document.documentElement.classList.toggle('ion-palette-dark', dark);
 };
 
@@ -183,7 +181,6 @@ const toggleTheme = () => {
 };
 
 onMounted(() => {
-  // Load saved theme preference, or fall back to system preference
   const saved = localStorage.getItem('theme');
   if (saved) {
     isDarkMode.value = saved === 'dark';
@@ -192,7 +189,6 @@ onMounted(() => {
   }
   applyTheme(isDarkMode.value);
 
-  // Optional: react to system theme changes when user hasn't chosen
   window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
     if (!localStorage.getItem('theme')) {
       isDarkMode.value = e.matches;
@@ -201,7 +197,7 @@ onMounted(() => {
   });
 });
 
-// ========== FIREBASE (unchanged) ==========
+// ========== FIREBASE ==========
 onMounted(() => {
   const contactsRef = ref(db, 'contacts');
   onValue(contactsRef, (snapshot) => {
@@ -228,7 +224,7 @@ const filteredContacts = computed(() => {
   );
 });
 
-// UI Helpers (visual only)
+// UI Helpers
 const getInitials = (name) => {
   if (!name) return '?';
   const parts = name.trim().split(' ');
@@ -274,7 +270,7 @@ const closeModal = () => {
   isModalOpen.value = false;
 };
 
-// CREATE & UPDATE logic (unchanged)
+// CREATE & UPDATE logic
 const saveContact = async () => {
   if (!form.value.name || !form.value.phone) {
     alert('Please fill out Name and Phone number.');
@@ -305,7 +301,7 @@ const saveContact = async () => {
   closeModal();
 };
 
-// DELETE logic (unchanged)
+// DELETE logic
 const deleteContact = async (id) => {
   if (confirm('Are you sure you want to delete this contact?')) {
     const contactRef = ref(db, `contacts/${id}`);
@@ -401,7 +397,6 @@ const deleteContact = async (id) => {
   25% { transform: rotate(15deg); }
   75% { transform: rotate(-10deg); }
 }
-
 
 .theme-toggle-btn {
   --color: #ffffff;
@@ -670,41 +665,114 @@ const deleteContact = async (id) => {
   color: #ffffff !important;
 }
 
+/* ========== MODAL ========== */
+
+/* Mobile: full screen (original Ionic behavior) */
 .modern-modal {
-  --border-radius: 24px;
-  --backdrop-opacity: 0.5;
-  --width: 90%;
-  --max-width: 520px;
+  --width: 100%;
+  --max-width: 100%;
+  --height: 100%;
+  --border-radius: 0;
+  --backdrop-opacity: 0;
 }
 
+/* Desktop/tablet: centered rounded card with definite height */
+@media (min-width: 768px) {
+  .modern-modal {
+    --width: 90%;
+    --max-width: 520px;
+    --height: 620px;
+    --max-height: 90vh;
+    --border-radius: 24px;
+    --backdrop-opacity: 0.5;
+  }
+}
+
+/* Modal content part — mobile */
 ion-modal.modern-modal::part(content) {
   background: #f9fafc;
-  border-radius: 24px;
+  border-radius: 0;
   overflow: hidden;
-  box-shadow: 0 20px 60px rgba(102, 126, 234, 0.25);
+  box-shadow: none;
+  width: 100%;
+  height: 100%;
 }
 
+/* Modal content part — desktop */
+@media (min-width: 768px) {
+  ion-modal.modern-modal::part(content) {
+    background: #f9fafc;
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(102, 126, 234, 0.25);
+    width: 100%;
+    height: 60%;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+/* Dark mode — mobile */
 :global(html.dark-theme) ion-modal.modern-modal::part(content) {
   background: #161a24;
-  border-radius: 24px;
+  border-radius: 0;
   overflow: hidden;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+  box-shadow: none;
+  width: 100%;
+  height: 100%;
+}
+
+/* Dark mode — desktop */
+@media (min-width: 768px) {
+  :global(html.dark-theme) ion-modal.modern-modal::part(content) {
+    background: #161a24;
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+    width: 100%;
+    height: 100%;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+  }
 }
 
 ion-modal.modern-modal::part(backdrop) {
   background: #000000;
-  opacity: 0.4;
+  opacity: 0;
+}
+
+@media (min-width: 768px) {
+  ion-modal.modern-modal::part(backdrop) {
+    background: #000000;
+    opacity: 0.4;
+  }
 }
 
 :global(html.dark-theme) ion-modal.modern-modal::part(backdrop) {
   background: #000000;
-  opacity: 0.75;
+  opacity: 0;
+}
+
+@media (min-width: 768px) {
+  :global(html.dark-theme) ion-modal.modern-modal::part(backdrop) {
+    background: #000000;
+    opacity: 0.75;
+  }
 }
 
 .modal-toolbar {
   --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   --color: #ffffff;
-  --border-radius: 24px 24px 0 0;
+  --border-radius: 0;
+  flex-shrink: 0;
+}
+
+@media (min-width: 768px) {
+  .modal-toolbar {
+    --border-radius: 24px 24px 0 0;
+  }
 }
 
 :global(html.dark-theme) .modal-toolbar {
@@ -734,15 +802,11 @@ ion-modal.modern-modal::part(backdrop) {
 .modal-content {
   --background: var(--form-bg);
   --padding-top: 16px;
-  --padding-bottom: 0; /* CHANGED: Removes the extra space at the bottom */
+  --padding-bottom: 16px;
   --padding-start: 16px;
   --padding-end: 16px;
   transition: --background 0.4s ease;
-
-    /* ADD THESE LINES */
-  flex: 0 1 auto; 
-  display: flex;
-  flex-direction: column;
+  flex: 1 1 auto;
 }
 
 :global(html.dark-theme) .modal-content {
@@ -752,8 +816,8 @@ ion-modal.modern-modal::part(backdrop) {
 .form-container {
   max-width: 500px;
   margin: 0 auto;
-  padding-bottom: 16px; /* ADDED: Gives just a small breathing room below the button */
-  height: auto; /* Ensures it only takes up the space it needs */
+  padding-bottom: 16px;
+  height: auto;
   animation: slideUp 0.4s ease;
 }
 
@@ -887,7 +951,6 @@ ion-modal.modern-modal::part(backdrop) {
   text-transform: none;
   transition: transform 0.2s ease, box-shadow 0.3s ease, --background 0.4s ease;
   margin-top: 8px;
-
 }
 
 :global(html.dark-theme) .save-button {

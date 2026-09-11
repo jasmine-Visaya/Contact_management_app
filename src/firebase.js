@@ -1,32 +1,20 @@
-
-// Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
-
-// Added 'onValue' to the import list below:
 import { getDatabase, ref, set, push, onValue, update, remove } from "firebase/database";
 
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: "AIzaSyDgLrHIDn1SXxZMyW9y0GNS-7CRTsfjNjc",
-  authDomain: "contactapp-990a6.firebaseapp.com",
-  projectId: "contactapp-990a6",
-  databaseURL: "https://contactapp-990a6-default-rtdb.asia-southeast1.firebasedatabase.app",
-  storageBucket: "contactapp-990a6.firebasestorage.app",
-  messagingSenderId: "585005004149",
-  appId: "1:585005004149:web:9cb68c1b9143b202398f3c",
-  measurementId: "G-4YGKCEV8YM"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  databaseURL: import.meta.env.VITE_FIREBASE_DATABASE_URL,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
 };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
 
 export const db = getDatabase(app);
-
 export { ref, set, push, onValue, update, remove };
-
-
