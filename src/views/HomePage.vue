@@ -733,8 +733,8 @@ const deleteContact = async (id) => {
 
 <style scoped>
 
-:root,
-:host {
+:global(:root),
+:global(:host){
   --app-bg: #f4f6fb;
   --card-bg: #ffffff;
   --card-shadow: 0 4px 16px rgba(102, 126, 234, 0.08);
@@ -762,6 +762,7 @@ const deleteContact = async (id) => {
   --letter-header-color: #667eea;
   --detail-info-bg: #ffffff;
 }
+
 
 :global(html.dark-theme) {
   --app-bg: #0f1117;
@@ -1118,15 +1119,12 @@ const deleteContact = async (id) => {
   color: #ffffff !important;
 }
 
-/* ===================================================== */
-/* ========== MODAL OVERLAY (shared) =================== */
-/* ===================================================== */
 
 .modal-overlay {
   position: fixed;
   inset: 0;
   z-index: 9999;
-  background: rgba(0, 0, 0, 0);
+  background: rgba(0, 0, 0, 0.4);
   display: flex;
   align-items: stretch;
   justify-content: center;
