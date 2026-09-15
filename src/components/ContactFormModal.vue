@@ -1,74 +1,83 @@
 <template>
-  <transition name="modal-fade">
-    <div v-if="isOpen" class="modal-overlay" @click.self="$emit('close')">
-      <div class="modal-card">
-        <div class="modal-header">
-          <h2 class="modal-title">
-            <ion-icon
-              :icon="isEditing ? createOutline : addCircleOutline"
-              class="modal-title-icon"
-            ></ion-icon>
-            {{ isEditing ? 'Edit Contact' : 'Add New Contact' }}
-          </h2>
-          <button class="cancel-button" @click="$emit('close')">Cancel</button>
-        </div>
+  <ion-modal
+    :is-open="isOpen"
+    :breakpoints="breakpoints"
+    :initial-breakpoint="initialBreakpoint"
+    :backdrop-breakpoint="0.5"
+    :backdrop-dismiss="true"
+    :handle="true"
+    class="form-modal"
+    @didDismiss="$emit('close')"
+  >
+    <div class="modal-shell">
+      <!-- HEADER -->
+      <div class="modal-header">
+        <h2 class="modal-title">
+          <ion-icon
+            :icon="isEditing ? createOutline : addCircleOutline"
+            class="modal-title-icon"
+          ></ion-icon>
+          {{ isEditing ? 'Edit Contact' : 'Add New Contact' }}
+        </h2>
+        <button class="cancel-button" @click="$emit('close')">Cancel</button>
+      </div>
 
-        <div class="modal-body">
-          <div class="form-container">
-            <div class="form-item avatar-form-item">
-              <label class="form-label">Profile Picture</label>
-              <AvatarUploader
-                :avatar="form.avatar"
-                :name="form.name"
-                @update:avatar="form.avatar = $event"
-                @remove="form.avatar = ''"
-              />
-            </div>
-
-            <div class="form-item">
-              <label class="form-label">Name *</label>
-              <input v-model="form.name" type="text" placeholder="John Doe" class="form-input" />
-            </div>
-
-            <div class="form-item">
-              <label class="form-label">Phone Number *</label>
-              <input v-model="form.phone" type="tel" placeholder="09123456789" class="form-input" />
-            </div>
-
-            <div class="form-item">
-              <label class="form-label">Email Address</label>
-              <input v-model="form.email" type="email" placeholder="john@example.com" class="form-input" />
-            </div>
-
-            <div class="form-item">
-              <label class="form-label">Address</label>
-              <input v-model="form.address" type="text" placeholder="123 Street, City" class="form-input" />
-            </div>
-
-            <div class="form-item">
-              <label class="form-label">Category / Relationship *</label>
-              <select v-model="form.category" class="form-select">
-                <option value="Family">Family</option>
-                <option value="Friend">Friend</option>
-                <option value="Work">Work</option>
-                <option value="Other">Other</option>
-              </select>
-            </div>
-
-            <button class="save-button" @click="handleSave">
-              <ion-icon :icon="isEditing ? checkmarkCircleOutline : addCircleOutline"></ion-icon>
-              {{ isEditing ? 'Update Contact' : 'Save Contact' }}
-            </button>
+      <!-- BODY -->
+      <div class="modal-body">
+        <div class="form-container">
+          <div class="form-item avatar-form-item">
+            <label class="form-label">Profile Picture</label>
+            <AvatarUploader
+              :avatar="form.avatar"
+              :name="form.name"
+              @update:avatar="form.avatar = $event"
+              @remove="form.avatar = ''"
+            />
           </div>
+
+          <div class="form-item">
+            <label class="form-label">Name *</label>
+            <input v-model="form.name" type="text" placeholder="John Doe" class="form-input" />
+          </div>
+
+          <div class="form-item">
+            <label class="form-label">Phone Number *</label>
+            <input v-model="form.phone" type="tel" placeholder="09123456789" class="form-input" />
+          </div>
+
+          <div class="form-item">
+            <label class="form-label">Email Address</label>
+            <input v-model="form.email" type="email" placeholder="john@example.com" class="form-input" />
+          </div>
+
+          <div class="form-item">
+            <label class="form-label">Address</label>
+            <input v-model="form.address" type="text" placeholder="123 Street, City" class="form-input" />
+          </div>
+
+          <div class="form-item">
+            <label class="form-label">Category / Relationship *</label>
+            <select v-model="form.category" class="form-select">
+              <option value="Family">Family</option>
+              <option value="Friend">Friend</option>
+              <option value="Work">Work</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+
+          <button class="save-button" @click="handleSave">
+            <ion-icon :icon="isEditing ? checkmarkCircleOutline : addCircleOutline"></ion-icon>
+            {{ isEditing ? 'Update Contact' : 'Save Contact' }}
+          </button>
         </div>
       </div>
     </div>
-  </transition>
+  </ion-modal>
 </template>
 
 <script setup>
-import { ref, watch } from 'vue';
-import { IonIcon } from '@ionic/vue';
+import { ref, watch, computed } from 'vue';
+import { IonModal, IonIcon } from '@ionic/vue';
 import {
   createOutline, addCircleOutline, checkmarkCircleOutline
 } from 'ionicons/icons';
@@ -81,6 +90,9 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['close', 'save']);
+
+const breakpoints = computed(() => [0, 0.75, 1]);
+const initialBreakpoint = 0.95;
 
 const form = ref({
   name: '', phone: '', email: '', address: '',
@@ -116,66 +128,17 @@ const handleSave = () => {
 };
 </script>
 
+<!-- Scoped: content inside the modal -->
 <style scoped>
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 9999;
-  background: rgba(0, 0, 0, 0.4);
-  display: flex;
-  align-items: stretch;
-  justify-content: center;
-}
-
-@media (min-width: 768px) {
-  .modal-overlay {
-    background: rgba(0, 0, 0, 0.45);
-    align-items: center;
-    padding: 24px;
-  }
-}
-
-:global(html.dark-theme) .modal-overlay {
-  background: rgba(0, 0, 0, 0);
-}
-
-@media (min-width: 768px) {
-  :global(html.dark-theme) .modal-overlay {
-    background: rgba(0, 0, 0, 0.75);
-  }
-}
-
-.modal-card {
-  width: 100%;
-  height: 100%;
-  max-height: 100%;
-  background: #f9fafc;
+.modal-shell {
   display: flex;
   flex-direction: column;
+  height: 100%;
+  background: var(--form-bg);
   overflow: hidden;
-  border-radius: 0;
 }
 
-:global(html.dark-theme) .modal-card {
-  background: #161a24;
-}
-
-@media (min-width: 768px) {
-  .modal-card {
-    width: 100%;
-    max-width: 520px;
-    height: auto;
-    max-height: 90vh;
-    border-radius: 24px;
-    box-shadow: 0 20px 60px rgba(102, 126, 234, 0.25);
-  }
-
-  :global(html.dark-theme) .modal-card {
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
-  }
-}
-
-/* Header */
+/* Header — gradient fills top safe area */
 .modal-header {
   flex-shrink: 0;
   display: flex;
@@ -183,19 +146,13 @@ const handleSave = () => {
   justify-content: space-between;
   gap: 12px;
   padding: 16px 20px;
+  padding-top: calc(16px + env(safe-area-inset-top, 0px));
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: #ffffff;
-  border-radius: 0;
 }
 
 :global(html.dark-theme) .modal-header {
   background: linear-gradient(135deg, #4a56b8 0%, #6a4090 100%);
-}
-
-@media (min-width: 768px) {
-  .modal-header {
-    border-radius: 24px 24px 0 0;
-  }
 }
 
 .modal-title {
@@ -208,9 +165,7 @@ const handleSave = () => {
   color: #ffffff;
 }
 
-.modal-title-icon {
-  font-size: 1.2rem;
-}
+.modal-title-icon { font-size: 1.2rem; }
 
 .cancel-button {
   background: transparent;
@@ -225,21 +180,15 @@ const handleSave = () => {
   font-family: inherit;
 }
 
-.cancel-button:hover {
-  background: rgba(255, 255, 255, 0.15);
-}
+.cancel-button:hover { background: rgba(255, 255, 255, 0.15); }
 
-/* Body */
+/* Body — bottom pad for home indicator */
 .modal-body {
   flex: 1 1 auto;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  padding: 16px;
+  padding: 16px 16px calc(16px + env(safe-area-inset-bottom, 0px));
   background: var(--form-bg);
-}
-
-:global(html.dark-theme) .modal-body {
-  background: #161a24;
 }
 
 .form-container {
@@ -256,7 +205,7 @@ const handleSave = () => {
   padding: 12px 16px;
   margin-bottom: 14px;
   box-shadow: var(--form-shadow);
-  transition: box-shadow 0.3s ease, transform 0.2s ease, background-color 0.4s ease;
+  transition: box-shadow 0.3s ease, transform 0.2s ease;
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -287,19 +236,14 @@ const handleSave = () => {
   padding: 4px 0;
 }
 
-.form-input::placeholder {
-  color: var(--text-tertiary);
-  opacity: 0.7;
-}
+.form-input::placeholder { color: var(--text-tertiary); opacity: 0.7; }
+
+:global(html.dark-theme) .form-input,
+:global(html.dark-theme) .form-select { color: #e8ecf3; }
 
 :global(html.dark-theme) .form-input::placeholder {
   color: #6b7689;
   opacity: 1;
-}
-
-:global(html.dark-theme) .form-input,
-:global(html.dark-theme) .form-select {
-  color: #e8ecf3;
 }
 
 .form-select {
@@ -327,11 +271,8 @@ const handleSave = () => {
   color: #e8ecf3;
 }
 
-.avatar-form-item {
-  padding: 16px;
-}
+.avatar-form-item { padding: 16px; }
 
-/* Save button */
 .save-button {
   display: flex;
   align-items: center;
@@ -357,29 +298,40 @@ const handleSave = () => {
   box-shadow: 0 8px 24px rgba(102, 126, 234, 0.55);
 }
 
-.save-button ion-icon {
-  font-size: 1.2rem;
+.save-button ion-icon { font-size: 1.2rem; }
+</style>
+
+<!-- Non-scoped: host-level styling -->
+<style>
+/* Mobile: bottom sheet */
+ion-modal.form-modal {
+  --border-radius: 24px 24px 0 0;
+  --background: var(--form-bg);
+  --backdrop-opacity: 0.5;
+  margin-top: env(safe-area-inset-top, 0px);
 }
 
-/* Modal transition */
-.modal-fade-enter-active,
-.modal-fade-leave-active {
-  transition: opacity 0.25s ease;
+/* Desktop: centered card */
+@media (min-width: 768px) {
+  ion-modal.form-modal {
+    --width: 520px;
+    --height: auto;
+    --max-height: 90vh;
+    --border-radius: 24px;
+    --box-shadow: 0 20px 60px rgba(102, 126, 234, 0.25);
+    --backdrop-opacity: 0.45;
+    margin-top: 0;
+  }
 }
 
-.modal-fade-enter-active .modal-card,
-.modal-fade-leave-active .modal-card {
-  transition: transform 0.25s ease, opacity 0.25s ease;
+html.dark-theme ion-modal.form-modal {
+  --background: #161a24;
 }
 
-.modal-fade-enter-from,
-.modal-fade-leave-to {
-  opacity: 0;
-}
-
-.modal-fade-enter-from .modal-card,
-.modal-fade-leave-to .modal-card {
-  transform: translateY(20px) scale(0.98);
-  opacity: 0;
+@media (min-width: 768px) {
+  html.dark-theme ion-modal.form-modal {
+    --box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+    --backdrop-opacity: 0.75;
+  }
 }
 </style>
