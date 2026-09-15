@@ -138,15 +138,13 @@ const openDetail = (contact) => {
 };
 
 const closeDetail = () => {
-  if (!isDetailOpen.value) return;
   isDetailOpen.value = false;
-  setTimeout(() => (selectedContact.value = null), 350);
+  setTimeout(() => (selectedContact.value = null), 250);
 };
 
 const handleEditFromDetail = (contact) => {
   closeDetail();
-  // wait for detail modal leave animation before opening form modal
-  setTimeout(() => openModal(contact), 350);
+  openModal(contact);
 };
 
 const handleDeleteFromDetail = async (id) => {
@@ -176,9 +174,8 @@ const openModal = (contact = null) => {
 };
 
 const closeModal = () => {
-  if (!isModalOpen.value) return;
   isModalOpen.value = false;
-  setTimeout(() => (editingContact.value = null), 350);
+  editingContact.value = null;
 };
 
 const handleSave = async (formData) => {
@@ -194,6 +191,11 @@ const handleSave = async (formData) => {
   await saveContact(payload, isEditing.value ? formData.id : null, formData.favorite);
   closeModal();
 };
+
+/* ---------- Lock body scroll ---------- */
+watch([isModalOpen, isDetailOpen], ([modal, detail]) => {
+  document.documentElement.classList.toggle('modal-open', modal || detail);
+});
 </script>
 
 <style scoped>
@@ -257,12 +259,18 @@ const handleSave = async (formData) => {
   --detail-info-bg: #1c212e;
 }
 
+:global(html.modal-open),
+:global(html.modal-open body) {
+  overflow: hidden !important;
+}
+
 /* ---------- Toolbar ---------- */
 .modern-toolbar {
   --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   --color: #ffffff;
   --min-height: 64px;
   box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
+  transition: box-shadow 0.4s ease;
 }
 
 :global(html.dark-theme) .modern-toolbar {
@@ -327,13 +335,16 @@ const handleSave = async (formData) => {
   --color: var(--text-primary);
   --clear-button-color: var(--text-secondary);
   padding: 0;
+  transition: box-shadow 0.3s ease, --background 0.4s ease;
 }
 
-/* ---------- FAB (safe-area aware) ---------- */
+.modern-searchbar:hover {
+  --box-shadow: var(--search-shadow-hover);
+}
+
+/* ---------- FAB ---------- */
 .add-fab {
-  margin: 0 calc(16px + env(safe-area-inset-right, 0px))
-          calc(16px + env(safe-area-inset-bottom, 0px))
-          0;
+  margin: 0 16px 16px 0;
 }
 
 .add-fab-button {
